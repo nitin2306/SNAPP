@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant</title>
+    <style>
+        /* General styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container for centering content */
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Heading */
+        h1 {
+            font-size: 2.5em;
+            color: #002F6C; /* Oracle Redwood accent color */
+            margin-bottom: 20px;
+        }
+
+        /* Forms */
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #002F6C; /* Oracle Redwood primary color */
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        button:hover {
+            background-color: #003b8e; /* Darker shade for hover effect */
+        }
+
+        /* Chat box */
+        #chat-box {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: scroll;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Message wrapper */
+        .chat-message-wrapper {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        /* User messages */
+        .chat-message.user {
+            background-color: #e8f0fe;
+            color: #008000;
+            align-self: flex-end;
+        }
+
+        /* Bot messages */
+        .chat-message.bot {
+            background-color: #f1f1f1;
+            color: #333;
+            align-self: flex-start;
+        }
+
+        /* Common styles for chat messages */
+        .chat-message {
+            border-radius: 5px;
+            padding: 10px;
+            max-width: 75%;
+            display: inline-block;
+            word-break: break-word;
+        }
+
+        /* Aligning message text */
+        .chat-message.user {
+            margin-left: auto;
+        }
+
+        .chat-message.bot {
+            margin-right: auto;
+        }
+
+        /* Input form */
+        #message-form {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+
+        #message-input {
+            border: 1px solid #dcdcdc;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SnApP<img src="easy.png" alt="SnApP Icon" style="width:40px; height:40px; vertical-align:middle;"></h1>
+
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" id="pdf-file" accept=".pdf" required>
+            <button type="submit">Upload PDF</button>
+        </form>
+
+        <div id="chat-box"></div>
+
+        <form id="message-form">
+            <input type="text" id="message-input" placeholder="Ask about the PDF..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('upload-form');
+        const messageForm = document.getElementById('message-form');
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+
+        let pdfUrl = '';
+
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const fileInput = document.getElementById('pdf-file');
+            const formData = new FormData();
+            formData.append('pdf', fileInput.files[0]);
+
+            // Upload PDF to server
+/*            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                pdfUrl = data.pdfUrl; // URL of the uploaded PDF
+                chatBox.innerHTML += '<div class="chat-message bot">PDF uploaded successfully. You can now ask questions.</div>';
+            } else {
+                chatBox.innerHTML += '<div class="chat-message bot">Error uploading PDF.</div>';
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+*/
+            try {
+                const response = await fetch('http://127.0.0.1:5000/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    pdfUrl = data.pdfUrl; // URL of the uploaded PDF
+                    const baseUrl = 'http://localhost:5000';
+                    const fullUrl = baseUrl + data.pdfUrl; // Ensure this constructs the URL correctly
+
+                    chatBox.innerHTML += `<div class="chat-message bot">PDF uploaded successfully. You can now ask questions. <a href="${fullUrl}">View PDF</a></div>`;
+                } else {
+                    chatBox.innerHTML += '<div class="chat-message bot">Error uploading PDF.</div>';
+                }
+            } catch (error) {
+                chatBox.innerHTML += `<div class="chat-message bot">Exception: ${error.message}</div>`;
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+});
+
+        messageForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const message = messageInput.value;
+            chatBox.innerHTML += `<div class="chat-message user"><strong>You:</strong> ${message}</div>`;
+            messageInput.value = '';
+
+            // Send message to chatbot
+            const response = await fetch('http://127.0.0.1:5000/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ pdfUrl, message })
+            });
+
+            const data = await response.json();
+            chatBox.innerHTML += `<div class="chat-message bot"><strong>Snapp:</strong> ${data.reply}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
+        });
+    </script>
+</body>
+</html>
