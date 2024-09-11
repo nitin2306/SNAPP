@@ -10,6 +10,7 @@ Run the following commands in your terminal or command prompt to install the req
 - pip install pymupdf
 - pip install langdetect
 - pip install langgraph
+- pip install chromadb
 ### Using Groq API
 - The user does not need to explicitly download any model to host on their machine. Instead, the code uses Groq APIs to function
 (Since the Groq API is free to use, it has certain limitations which prevents processing of larger docs. Usage of premium APIs can resolve this issue)
