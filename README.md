@@ -32,3 +32,9 @@ This `README.md` provides clear instructions for setting up and running the proj
 - Ardhendu Banerjee
 -  Prashant Singh Chauhan
 - Pratik Bendre
+### References
+- Jeong, Soyeong, et al. "Adaptive-rag: Learning to adapt retrieval-augmented large language models through question complexity." arXiv preprint arXiv:2403.14403 (2024).
+- Yan, Shi-Qi, et al. "Corrective retrieval augmented generation." arXiv preprint arXiv:2401.15884 (2024).
+- Asai, Akari, et al. "Self-rag: Learning to retrieve, generate, and critique through self-reflection." arXiv preprint arXiv:2310.11511 (2023).
+- https://medium.com/the-ai-forum/build-a-reliable-rag-agent-using-langgraph-2694d55995cd
+
